@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Meniu</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #0a0a0a; color: #fff; padding: 40px 20px; }
+    .container { max-width: 950px; margin: 0 auto; }
+    h1, h2 { color: #f0c14b; margin-bottom: 20px; text-align: center; }
+    .form-box, .list-box { background: #1a1a1a; padding: 30px; border-radius: 16px; border: 1px solid #333; margin-bottom: 40px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    label { display: block; margin: 12px 0 6px; font-size: 14px; color: #ccc; }
+    input, textarea, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; font-size: 14px; }
+    .checkbox-wrap { margin: 20px 0 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .checkbox-wrap input { width: 18px; height: 18px; accent-color: #f0c14b; }
+    .size-box { background: #111; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-top: 10px; }
+    .size-box.s2 { border-color: #f0c14b; }
+    button.btn-add { background: #f0c14b; color: #000; border: none; padding: 14px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 20px; cursor: pointer; font-size: 16px; }
+    
+    /* Stiluri Tabel Poziții */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; }
+    th, td { padding: 12px; border-bottom: 1px solid #333; font-size: 14px; }
+    th { color: #f0c14b; }
+    td img { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; }
+    .badge-s2 { background: #222; border: 1px solid #f0c14b; color: #f0c14b; padding: 2px 6px; border-radius: 4px; font-size: 11px; display: inline-block; margin-top: 4px; }
+    .btn-delete { background: #e74c3c; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Admin – Gestionează Meniul</h1>
+    
+    <!-- FORMULAR ADAUGARE -->
+    <div class="form-box">
+      <form action="/admin/add" method="POST" enctype="multipart/form-data">
+        <div class="form-row">
+          <div>
+            <label>Nume produs *</label>
+            <input type="text" name="name" required placeholder="ex: Cappuccino">
+          </div>
+          <div>
+            <label>Categorie (Selectează sau scrie alta)</label>
+            <input list="categories-list" name="category" placeholder="Black & Milk Beverages" required>
+            <datalist id="categories-list">
+              <option value="Black & Milk Beverages">
+              <option value="Smoothies & Fresh">
+              <option value="Tea & Specialty">
+              <option value="Cold Brew & Tonic">
+            </datalist>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <label>Poză produs</label>
+          <input type="file" name="image" accept="image/*">
+        </div>
+
+        <!-- MĂRIMEA 1 -->
+        <div class="size-box">
+          <strong>Mărimea 1 (Standard)</strong>
+          <label>Volum (ex: 200 ml)</label>
+          <input type="text" name="volumes" placeholder="200 ml">
+          <div class="form-row">
+            <div>
+              <label>Preț 1 – Tucano (lei)</label>
+              <input type="number" step="0.01" name="price1" placeholder="19">
+            </div>
+            <div>
+              <label>Preț 2 – Ethiopia (lei)</label>
+              <input type="number" step="0.01" name="price2" placeholder="21">
+            </div>
+          </div>
+        </div>
+
+        <!-- BIFĂ PENTRU MĂRIMEA 2 -->
+        <label class="checkbox-wrap">
+          <input type="checkbox" onchange="document.getElementById('size2Container').style.display = this.checked ? 'block' : 'none'">
+          <strong>Adaugă a 2-a mărime (ex: 300 ml)</strong>
+        </label>
+
+        <!-- MĂRIMEA 2 (Implicit ascunsă) -->
+        <div id="size2Container" class="size-box s2" style="display: none;">
+          <strong>Mărimea 2 (Grande / Dublă)</strong>
+          <label>Volum Mărimea 2 (ex: 300 ml)</label>
+          <input type="text" name="volumes2" placeholder="300 ml">
+          <div class="form-row">
+            <div>
+              <label>Preț 1 Mărimea 2 – Tucano (lei)</label>
+              <input type="number" step="0.01" name="price1_size2" placeholder="25">
+            </div>
+            <div>
+              <label>Preț 2 Mărimea 2 – Ethiopia (lei)</label>
+              <input type="number" step="0.01" name="price2_size2" placeholder="28">
+            </div>
+          </div>
+        </div>
+
+        <label style="margin-top:15px;">Descriere (opțional)</label>
+        <textarea name="description" rows="2"></textarea>
+
+        <button type="submit" class="btn-add">+ Adaugă poziție</button>
+      </form>
+    </div>
+
+    <!-- LISTA POZIȚII EXISTENTE -->
+    <div class="list-box">
+      <h2>Poziții Salvate (<%= products ? products.length : 0 %>)</h2>
+      <% if (products && products.length > 0) { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Imagine</th>
+              <th>Nume</th>
+              <th>Categorie</th>
+              <th>Volum</th>
+              <th>Tucano</th>
+              <th>Ethiopia</th>
+              <th>Acțiune</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% products.forEach(product => { %>
+              <tr>
+                <td>
+                  <% if (product.image) { %>
+                    <img src="<%= product.image %>" alt="<%= product.name %>">
+                  <% } else { %>
+                    <span style="color: #666; font-size: 12px;">Fără poză</span>
+                  <% } %>
+                </td>
+                <td><strong><%= product.name %></strong></td>
+                <td><span style="color: #f0c14b;"><%= product.category %></span></td>
+                <td>
+                  <%= product.volumes || '-' %>
+                  <% if (product.volumes2) { %>
+                    <br><span class="badge-s2">M2: <%= product.volumes2 %></span>
+                  <% } %>
+                </td>
+                <td>
+                  <%= product.price1 %> lei
+                  <% if (product.price1_size2) { %>
+                    <br><span style="color: #aaa; font-size: 12px;"><%= product.price1_size2 %> lei</span>
+                  <% } %>
+                </td>
+                <td>
+                  <%= product.price2 %> lei
+                  <% if (product.price2_size2) { %>
+                    <br><span style="color: #aaa; font-size: 12px;"><%= product.price2_size2 %> lei</span>
+                  <% } %>
+                </td>
+                <td>
+                  <form action="/admin/delete/<%= product.id %>" method="POST" onsubmit="return confirm('Sigur ștergi produsul?');">
+                    <button type="submit" class="btn-delete">Șterge</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      <% } else { %>
+        <p style="text-align: center; color: #888; margin-top: 10px;">Nu există nicio poziție adăugată până acum.</p>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

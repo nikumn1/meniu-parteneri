@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partener - Creează Meniul</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #0a0a0a; 
+      color: #fff; 
+      padding: 40px 20px;
+    }
+    .container { max-width: 850px; margin: 0 auto; }
+    h1 { 
+      color: #f0c14b; 
+      margin-bottom: 8px; 
+      font-size: 28px;
+      text-align: center;
+    }
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+    }
+
+    .category-title {
+      color: #f0c14b;
+      font-size: 20px;
+      margin: 30px 0 15px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #333;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .product { 
+      background: #1a1a1a; 
+      padding: 16px 18px; 
+      margin-bottom: 12px; 
+      border-radius: 10px; 
+      display: flex; 
+      gap: 15px; 
+      align-items: center;
+      border: 1px solid #333;
+    }
+    
+    .product-img-wrapper {
+      width: 70px;
+      height: 70px;
+      min-width: 70px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #222;
+      border: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .product-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .no-image {
+      font-size: 10px;
+      color: #666;
+      text-align: center;
+    }
+
+    .info { flex: 1; }
+    .info strong { font-size: 16px; display: block; margin-bottom: 3px; }
+    .info small { color: #aaa; font-size: 13px; display: block; }
+    
+    .product-desc { 
+      color: #888; 
+      font-size: 12px; 
+      margin-top: 4px; 
+      line-height: 1.3;
+    }
+
+    .prices { 
+      text-align: right;
+      min-width: 220px;
+    }
+    
+    .select-order-group {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .select-order-group label {
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .position-input {
+      width: 45px !important;
+      padding: 4px !important;
+      border-radius: 5px;
+      border: 1px solid #f0c14b !important;
+      background: #222;
+      color: #f0c14b !important;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 13px;
+    }
+
+    .prices input[type="number"] { 
+      width: 65px; 
+      padding: 5px; 
+      border-radius: 5px; 
+      border: 1px solid #444; 
+      background: #222; 
+      color: #fff; 
+      text-align: center;
+    }
+    
+    .size-label {
+      font-size: 11px;
+      color: #f0c14b;
+      margin-top: 6px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .actions {
+      margin-top: 40px;
+      text-align: center;
+    }
+    button { 
+      background: #f0c14b; 
+      color: #000; 
+      border: none; 
+      padding: 14px 30px; 
+      border-radius: 8px; 
+      font-weight: bold; 
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover { background: #e0b03a; }
+    a { color: #f0c14b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Creează Meniul tău</h1>
+    <p class="subtitle">Selectează produsele, ordinea de afișare și setează prețurile</p>
+
+    <% if (products.length === 0) { %>
+      <p style="text-align:center; color:#888; margin-top:40px;">
+        Nu există produse.<br>
+        <a href="/admin">Mergi la Admin</a> și adaugă poziții.
+      </p>
+    <% } else { 
+      const categories = {};
+      products.forEach(p => {
+        const cat = p.category && p.category.trim() !== '' ? p.category : 'Altele';
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push(p);
+      });
+      let indexOrd = 1;
+    %>
+
+      <form id="menuForm" action="/generate-pdf" method="POST">
+        <input type="hidden" name="selected" id="selectedData">
+
+        <% Object.keys(categories).forEach(function(categoryName) { %>
+          <div class="category-block">
+            <h2 class="category-title"><%= categoryName %></h2>
+
+            <% categories[categoryName].forEach(function(p) { %>
+              <div class="product">
+                
+                <div class="product-img-wrapper">
+                  <% if (p.image) { %>
+                    <img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy">
+                  <% } else { %>
+                    <span class="no-image">Fără poză</span>
+                  <% } %>
+                </div>
+
+                <div class="info">
+                  <strong><%= p.name %></strong>
+                  <small>
+                    M1: <%= p.volumes || 'N/A' %>
+                    <% if (p.volumes2) { %>
+                      | M2: <%= p.volumes2 %>
+                    <% } %>
+                  </small>
+                  
+                  <% if (p.description && p.description.trim() !== '') { %>
+                    <p class="product-desc"><%= p.description %></p>
+                  <% } %>
+                </div>
+
+                <div class="prices">
+                  <div class="select-order-group">
+                    <span style="font-size: 12px; color: #aaa;">Poz:</span>
+                    <input type="number" min="1" class="position-input" data-id="<%= p.id %>" value="<%= indexOrd++ %>">
+                    <label>
+                      <input type="checkbox" class="select-item" 
+                             data-id="<%= p.id %>" 
+                             data-name="<%= p.name %>" 
+                             data-volumes="<%= p.volumes || '' %>"
+                             data-volumes2="<%= p.volumes2 || '' %>"
+                             data-description="<%= p.description || '' %>"
+                             data-image="<%= p.image || '' %>"
+                             data-category="<%= p.category || '' %>">
+                      Selectează
+                    </label>
+                  </div>
+
+                  <!-- MĂRIMEA 1 -->
+                  <div class="price-row">
+                    <span>Tucano:</span>
+                    <input type="number" step="0.01" class="price1" data-id="<%= p.id %>" value="<%= p.price1 %>">
+                    <span>Ethiopia:</span>
+                    <input type="number" step="0.01" class="price2" data-id="<%= p.id %>" value="<%= p.price2 %>">
+                  </div>
+
+                  <!-- MĂRIMEA 2 (Dacă există) -->
+                  <% if (p.volumes2) { %>
+                    <div class="size-label">Mărimea 2 (<%= p.volumes2 %>)</div>
+                    <div class="price-row">
+                      <span>Tucano:</span>
+                      <input type="number" step="0.01" class="price1_s2" data-id="<%= p.id %>" value="<%= p.price1_size2 || 0 %>">
+                      <span>Ethiopia:</span>
+                      <input type="number" step="0.01" class="price2_s2" data-id="<%= p.id %>" value="<%= p.price2_size2 || 0 %>">
+                    </div>
+                  <% } %>
+
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% }); %>
+
+        <div class="actions">
+          <button type="submit">Descarcă PDF</button>
+        </div>
+      </form>
+
+    <% } %>
+  </div>
+
+  <script>
+    document.getElementById('menuForm').addEventListener('submit', function(e) {
+      var selected = [];
+      var checkboxes = document.querySelectorAll('.select-item:checked');
+
+      for (var i = 0; i < checkboxes.length; i++) {
+        var cb = checkboxes[i];
+        var id = cb.getAttribute('data-id');
+        var p1 = document.querySelector('.price1[data-id="' + id + '"]');
+        var p2 = document.querySelector('.price2[data-id="' + id + '"]');
+        var p1_s2 = document.querySelector('.price1_s2[data-id="' + id + '"]');
+        var p2_s2 = document.querySelector('.price2_s2[data-id="' + id + '"]');
+        var posInput = document.querySelector('.position-input[data-id="' + id + '"]');
+
+        selected.push({
+          id: id,
+          name: cb.getAttribute('data-name'),
+          category: cb.getAttribute('data-category'),
+          volumes: cb.getAttribute('data-volumes'),
+          volumes2: cb.getAttribute('data-volumes2'),
+          description: cb.getAttribute('data-description'),
+          image: cb.getAttribute('data-image'),
+          price1: p1 ? parseFloat(p1.value) || 0 : 0,
+          price2: p2 ? parseFloat(p2.value) || 0 : 0,
+          price1_size2: p1_s2 ? parseFloat(p1_s2.value) || 0 : 0,
+          price2_size2: p2_s2 ? parseFloat(p2_s2.value) || 0 : 0,
+          order: posInput ? (parseInt(posInput.value, 10) || 999) : 999
+        });
+      }
+
+      if (selected.length === 0) {
+        e.preventDefault();
+        alert('Selectează cel puțin un produs!');
+        return;
+      }
+
+      // Sortare crescătoare după poziția introdusă de partener
+      selected.sort(function(a, b) {
+        return a.order - b.order;
+      });
+
+      document.getElementById('selectedData').value = JSON.stringify(selected);
+    });
+  </script>
+</body>
+</html>
