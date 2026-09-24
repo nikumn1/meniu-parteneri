@@ -1,14 +1,41 @@
 {
   "name": "meniu-parteneri",
   "version": "1.0.0",
-  "description": "Prima versiune meniu",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "electron .",
+    "build": "electron-builder",
+    "postinstall": "electron-rebuild -f -w sqlite3"
+  },
+  "build": {
+    "appId": "com.meniu.parteneri",
+    "productName": "MeniuParteneri",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": false,
+  "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "files": [
+      "main.js",
+      "server.js",
+      "icon.ico",
+      "public/**/*",
+      "views/**/*"
+    ]
   },
   "dependencies": {
-    "ejs": "^3.1.9",
+    "ejs": "^6.0.1",
     "express": "^4.19.2",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "puppeteer": "^22.0.0",
+    "sqlite3": "^5.1.7",
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "electron-rebuild": "^3.2.9"
   }
 }
