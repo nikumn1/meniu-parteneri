@@ -14,7 +14,7 @@
       "output": "dist"
     },
     "asar": false,
-  "win": {
+    "win": {
       "target": "nsis",
       "icon": "icon.ico"
     },
@@ -31,7 +31,7 @@
     "express": "^4.19.2",
     "multer": "^1.4.5-lts.1",
     "puppeteer": "^22.0.0",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "electron": "^33.0.0",
